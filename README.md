@@ -1,5 +1,5 @@
 # CubeScope
 
-Implementation of ,
+Implementation of CubeScope,
 Kota Nakamura, Yasuko Matsubara, Koki Kawabata, Yuhei Umeda, Yuichiro Wada, Yasushi Sakurai,
-[WWW](https://nips.cc/), 2023.
+The Web Conference 2023 [WWW'23](https://www2023.thewebconf.org/).
