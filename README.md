@@ -20,7 +20,6 @@ The Web Conference 2023, [WWW'23](https://www2023.thewebconf.org/).
 <img src="./_assets/temporal_clustering.png" width=400>
 
 ## Input for CubeScope
-------------
 Pandas.DataFrame  
 Time + Multiple categorical attributes  
 
@@ -28,6 +27,25 @@ Time + Multiple categorical attributes
 1|                                :  
 2|                                :  
 3|                                :  
+
+## Datasets
+
+1. *NYC-Taxi*  
+https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page.
+2. *Bike-Share*  
+https://ride.citibikenyc.com/system-data.
+3. *Jewerly*  
+https://www.kaggle.com/mkechinov/ecommerce-purchase-history-from-jewelry-store.
+4. *Electronics*  
+https://www.kaggle.com/mkechinov/ecommerce-purchase-history-from-electronics-store.
+5. *AirForce*  
+http://kdd.ics.uci.edu/databases/kddcup99/kddcup99.html
+6. *External*  
+https://www.hs-coburg.de/forschung/forschungsprojekte-oeffentlich/informationstechnologie/cidds-coburg-intrusion-detection-data-sets.html
+7. *OpenStack*  
+[ditto](https://www.hs-coburg.de/forschung/forschungsprojekte-oeffentlich/informationstechnologie/cidds-coburg-intrusion-detection-data-sets.html) 
+8. *Kyoto*  
+https://www.takakura.com/Kyoto_data/
 
 ## Citation
 If you use this code for your research, please consider citing our WWW paper.
