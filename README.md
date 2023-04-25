@@ -48,6 +48,10 @@ https://www.hs-coburg.de/forschung/forschungsprojekte-oeffentlich/informationste
 https://www.takakura.com/Kyoto_data/
 
 ## Citation
+:construction: Under Construction  
 If you use this code for your research, please consider citing our WWW paper.
 
 
+## More on
+* Paper: [[arXiv]](https://arxiv.org/abs/2303.03789)
+* Short Video: [[YouTube]](https://youtu.be/v-E-QjEBwNk)
