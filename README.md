@@ -54,5 +54,5 @@ If you use this code for your research, please consider citing our WWW paper.
 
 
 ## More on
-* Paper: [[arXiv]](https://arxiv.org/abs/2303.03789)
+* Paper: [[ACM DL]](https://dl.acm.org/doi/10.1145/3543507.3583370) [[arXiv]](https://arxiv.org/abs/2303.03789)
 * Short Video: [[YouTube]](https://youtu.be/v-E-QjEBwNk)
