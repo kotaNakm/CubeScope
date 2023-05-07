@@ -49,8 +49,7 @@ https://www.takakura.com/Kyoto_data/
 
 ## Citation
 If you use this code for your research, please consider citing our WWW paper.
-
-```
+```bibtex
 @inproceedings{nakamura2023cubescope,
   title={Fast and Multi-aspect Mining of Complex Time-stamped Event Streams},
   author={Nakamura, Kota and Matsubara, Yasuko and Kawabata, Koki and Umeda, Yuhei and Wada, Yuichiro and Sakurai, Yasushi},
