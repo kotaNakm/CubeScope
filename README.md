@@ -48,10 +48,17 @@ https://www.hs-coburg.de/forschung/forschungsprojekte-oeffentlich/informationste
 https://www.takakura.com/Kyoto_data/
 
 ## Citation
-:construction: Under Construction :construction:
-
 If you use this code for your research, please consider citing our WWW paper.
 
+```
+@inproceedings{nakamura2023cubescope,
+  title={Fast and Multi-aspect Mining of Complex Time-stamped Event Streams},
+  author={Nakamura, Kota and Matsubara, Yasuko and Kawabata, Koki and Umeda, Yuhei and Wada, Yuichiro and Sakurai, Yasushi},
+  booktitle={Proceedings of the ACM Web Conference 2023},
+  pages={1638--1649},
+  year={2023}
+}
+```
 
 ## More on
 * Paper: [[ACM DL]](https://dl.acm.org/doi/10.1145/3543507.3583370) [[arXiv]](https://arxiv.org/abs/2303.03789)
