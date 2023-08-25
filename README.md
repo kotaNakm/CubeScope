@@ -29,7 +29,6 @@ Time + Multiple categorical attributes
 3|                                :  
 
 ## Datasets
-
 1. *NYC-Taxi*  
 https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page.
 2. *Bike-Share*  

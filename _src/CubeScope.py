@@ -10,7 +10,6 @@ import time
 import warnings
 
 warnings.simplefilter("ignore")
-# sys.dont_write_bytecode = True
 
 
 ZERO = 1.0e-8
@@ -62,19 +61,12 @@ class Regime(object):
         self.costM = cost
         return cost
 
-    def compute_costC(self, X, pred=True, norm=True):
+    def compute_costC(self, X):
         if len(X) == 0:
             return 0
-        if norm:
-            self.factors = _normalize_factors(self.factors)
-        else:
-            pass
-        # ind_ = np.nonzero(X)
-        if pred:
-            return _compute_costC(X.to_numpy(), self.factors)
-        else:
-            print(f"calc like pred: {_compute_costC(X.to_numpy(), self.factors)}")
-            return -self.log_likelihood()
+
+        self.factors = _normalize_factors(self.factors)
+        return _compute_costC(X.to_numpy(), self.factors)
 
     def log_likelihood(
         self,
@@ -133,7 +125,6 @@ class CubeScope(object):
         early_stoppping: bool = False,
         tensor_shape=[],
     ):
-
         # initialze
         self.k = k  # # of topics
         self.width = width
@@ -171,7 +162,7 @@ class CubeScope(object):
         self.sampling_log_likelihoods = []
 
         # for update parameters
-        self.max_alpha = 100  
+        self.max_alpha = 100
         self.max_beta = 100
 
     def init_params(self, alpha, beta):
@@ -192,7 +183,6 @@ class CubeScope(object):
         Asum = tensor.groupby(self.keys[0]).size()
         self.counterA[Asum.index] = Asum.values
 
-
     def init_infer(
         self,
         tensor_train,
@@ -200,14 +190,12 @@ class CubeScope(object):
         init_l: bool = True,
         return_inference_time=False,
         calc_computational_cost=False,
-    ):  #:, init=True):
+    ):
         """Initialize model parameters i.e, training process
         1. batch estimation for each subtensor
         2. Initialize model parameters employing subtensors given by 1.
         """
-        self.time_idx = (
-            list(tensor_train.columns)[0]
-        )
+        self.time_idx = list(tensor_train.columns)[0]
         self.keys = list(tensor_train.keys())
 
         self.l = int(tensor_train[self.time_idx].max() // self.width)
@@ -408,7 +396,6 @@ class CubeScope(object):
             print(f"initialized costC for train segment #{ini}: {tmp_costC}")
             print(f"initialized costM for train segment #{ini}: {tmp_costM}")
 
-
         if self.anomaly:
             self.aggregate_initials(ini_regimes)
             self.l = 1
@@ -529,7 +516,6 @@ class CubeScope(object):
         return cost, alloc
 
     def infer_online(self, tensor, alpha, beta, n_iter=10):
-
         # whether apply tuned parameter in initialization
         if True:
             self.init_params(alpha, beta)
@@ -662,12 +648,6 @@ class CubeScope(object):
         push and pop prev_dist queue
         """
 
-        # for visualize
-        if False:
-            print(f"diff prev distributions")
-            for mode_ in range(self.n_modes):
-                print(self.factors[mode_] - self.prev_distributions[mode_][-1])
-
         if cnt:
             for mode_ in range(self.n_modes):
                 self.prev_distributions[mode_][:-1] = copy.deepcopy(
@@ -749,7 +729,7 @@ class CubeScope(object):
         print(f"cand costM: {costM}")
         print(f"cand costT: {cost_1}")
 
-        cost_0 = prev_rgm.compute_costC(X, pred=True)
+        cost_0 = prev_rgm.compute_costC(X)
         print(f"prev costT: {cost_0}")
 
         self.vscost_log.append([cost_0, cost_1, cost_1 - cost_0, costC, costM])
@@ -764,7 +744,6 @@ class CubeScope(object):
             print("STAY")
 
             prev_rgm = self.regimes[self.prev_rgm_id]
-            time_mat = prev_rgm.factors[0]
 
         else:  # shift to any regime
             self.n_segment += 1
@@ -795,16 +774,12 @@ class CubeScope(object):
             if add_flag:  # add candidate regime to regime set
                 self.regimes.append(candidate_rgm)
                 self.prev_rgm_id = shift_id
-                time_mat = (
-                    candidate_rgm.factors[0]
-                )
 
             else:  # use existing regime
                 shift_rgm = self.regimes[shift_id]
                 self.alpha = copy.deepcopy(shift_rgm.alpha)
                 self.betas = copy.deepcopy(shift_rgm.betas)
                 self.prev_rgm_id = shift_id
-                time_mat = shift_rgm.factors[0] 
 
         # For anormaly detection
         if self.anomaly:
@@ -817,19 +792,16 @@ class CubeScope(object):
                     for m_comp, m in zip(self.all_comp_regime.counterM, self.counterM)
                 ]
                 self.all_comp_regime.counterK = (
-                    (self.all_comp_regime.counterK) + self.counterK
-                )
+                    self.all_comp_regime.counterK
+                ) + self.counterK
                 self.all_comp_regime.counterA = (
-                    (self.all_comp_regime.counterA) + self.counterA
-                )
+                    self.all_comp_regime.counterA
+                ) + self.counterA
                 self.all_comp_regime.compute_factors()
             observed_cost = costC
-            expected_cost = self.all_comp_regime.compute_costC(X, pred=True)
-            # self.anorm_scores.append(self.calc_anomaly_score(candidate_rgm,self.all_count,current_count))
+            expected_cost = self.all_comp_regime.compute_costC(X)
 
-            a_score = self.calc_anomaly_score(
-                observed_cost, expected_cost, len(X)
-            )
+            a_score = self.calc_anomaly_score(observed_cost, expected_cost, len(X))
             self.anomaly_scores.append(a_score)
             print("===Anomaly score===")
             print(a_score)
@@ -846,7 +818,6 @@ class CubeScope(object):
         return a_scroe
 
     def regime_initialize(self, regime_instance):
-
         regime_instance.k = self.k
         regime_instance.n_dims = self.n_dims
         regime_instance.n_modes = self.n_modes
@@ -926,36 +897,24 @@ def _gibbs_sampling(X, Z, counterM, counterK, counterA, alpha, betas, k, n_dims)
 
         """ compute posterior distribution """
         posts = np.full(k, 1.0, dtype=np.float64)
-        # print(posts)
         posts *= counterM[0][x[0]] + alpha[x[0]]  # return (k,) vector
-        # print(posts)
         posts /= counterA[x[0]] + alpha[x[0]] * k
-        # print(posts)
         for j in range(1, n_modes):
             posts *= counterM[j][x[j]] + betas[j - 1]
-            # print(posts)
             posts /= counterK + betas[j - 1] * n_dims[j]
-        # print(posts)
-        # posts = posts / (posts.sum() + ZERO)  # to avoid underflow ?
-        posts = posts / posts.sum()  # to avoid underflow ?
-        # print(posts)
+        posts = posts / posts.sum()
 
         try:
-            # new_topic = np.argmax(np.random.multinomial(1, posts))
             new_topic = draw_one(posts)
-            # print(e,new_topic)
         except:
             print("cannot calc assignment posterior:")
-            # print(posts)
             return
 
         Z[e] = new_topic
         counterK[new_topic] += 1
         for mode_, d in enumerate(x):
             counterM[mode_][d, new_topic] += 1
-        # print(posts)
-        # if e>100:
-        #     return
+
     return Z
 
 
@@ -966,7 +925,6 @@ def _gibbs_sampling_online(
     np.random.seed(SEED)
 
     # ready for (hypa * prev)
-    # prev_terms = [[] for _ in range(len(n_dims))]
     prev_terms = []
     for mode_, d in enumerate(n_dims):
         prev_terms.append(np.zeros((d, k)))
@@ -998,10 +956,8 @@ def _gibbs_sampling_online(
             posts *= counterM[j][x[j]] + prev_terms[j][x[j]]
             posts /= counterK + l * betas[j - 1]
 
-        # posts = posts / (posts.sum() + ZERO)  # to avoid underflow
         posts = posts / posts.sum()
         try:
-            # new_topic = np.argmax(np.random.multinomial(1, posts))
             new_topic = draw_one(posts)
         except:
             print("cannot calc assignment posterior:")
@@ -1011,7 +967,6 @@ def _gibbs_sampling_online(
         counterK[new_topic] += 1
         for mode_, d in enumerate(x):
             counterM[mode_][d, new_topic] += 1
-        # print(posts)
     return Z, prev_terms
 
 
@@ -1021,13 +976,8 @@ def log_s(x):
     return 2.0 * np.log2(x) + 1
 
 
-# compute log likelihood in naive way
-# it can also be used for unknown(future) data
-
-
 @numba.jit(nopython=True)
 def _compute_costC(X, factors):
-    # all_count = len(X)
     k = factors[0].shape[1]
     all_L = 0
     for x in X:
@@ -1037,7 +987,6 @@ def _compute_costC(X, factors):
             for att_idx, factor in zip(x, factors):
                 rval_ += np.log(factor[att_idx, r] + ZERO)
             val_ = rval_ if r == 0 else np.logaddexp(val_, rval_)
-            # val_ = logsumexp(val_,rval_,r)
         all_L -= val_
     # transform base
     return all_L / np.log(2.0)
@@ -1065,27 +1014,14 @@ def _normalize_factors(factors):
     O: item-wise topic distribution
     A,C: topic-wise item distribution
     """
-    # norm_factors = copy.deepcopy(factors)
-    # norm_factors = factors.copy("deep")
 
     for d in range(factors[0].shape[0]):
         sum_ = np.sum(factors[0], axis=1) + ZERO
         factors[0] = (factors[0].T / sum_).T
 
-    # for d in range(factors[0].shape[0]):
-    #     sum_ = factors[0][d, :].sum() + ZERO
-    #     factors[0][d, :] = factors[0][d, :] / sum_
-
     for ind, factor in enumerate(factors[1:]):
         sum_ = np.sum(factor, axis=0) + ZERO
         factors[ind + 1] /= sum_
-
-    # for ind, factor in enumerate(factors[1:]):
-    #     for k in range(factor.shape[1]):
-    #         sum_ = factor[:, k].sum() + ZERO
-    #         factors[ind + 1][:, k] = factor[:, k] / sum_
-
-    # return norm_factors
     return factors
 
 

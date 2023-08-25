@@ -97,7 +97,6 @@ def plot_regimeassignment(
     # replace_time=False,
     # replace_time_width=500,
 ):
-
     all_rgm_num = len(CubeScope.regimes)
     length = CubeScope.data_len
     ax.set_title("Regime assignments")
@@ -226,7 +225,6 @@ if __name__ == "__main__":
     )
     print(f"train tensor shape::{tensor_Train.max().values+1}")
 
-
     # train
     CubeScope = CubeScope.CubeScope(
         tensor,
@@ -244,7 +242,7 @@ if __name__ == "__main__":
     regime_assignments = CubeScope.init_infer(tensor_Train, n_iter=args.N_ITER)
     elapsed_time = time.process_time() - start_time
     print(f"Elapsed time(train): {elapsed_time:.2f} [sec]")
-    
+
     if args.verbose:
         outputdir_s = outputdir + "/train/"
         if os.path.exists(outputdir_s):
