@@ -16,9 +16,11 @@ ZERO = 1.0e-8
 REGIME_R = 3.0e-3
 LAMBDA = 0.1
 MAX_INI_r = 2
-FB = 16
 TOL_R = 2 ** (-FB)
 SEED = 0
+
+FB = 16
+# FB = 2, 4, 8, 16, 32
 
 
 class Regime(object):
@@ -126,7 +128,7 @@ class CubeScope(object):
         tensor_shape=[],
     ):
         # initialze
-        self.k = k  # # of topics
+        self.k = k  # # of topics/components
         self.width = width
         self.init_len = init_len
         self.n_dims = tensor.max().values + 1
@@ -234,7 +236,7 @@ class CubeScope(object):
             start_inference_time = time.process_time()
             for iter_ in range(n_iter):
                 self.assignment = self.sample_topic(tensor.to_numpy())
-                # exit()
+
                 # compute log likelihood
                 llh = self.log_likelihood()
                 if self.verbose or iter_ == 0 or iter_ == (n_iter - 1):
@@ -259,9 +261,6 @@ class CubeScope(object):
                 self.counterK = best_counterK
                 print(f"best llh: {self.log_likelihood()}")
 
-            # print(self.assignment)
-            # exit()
-
             self.sampling_log_likelihoods.append(self.each_samp_llh)
             self.compute_factors_batch()
             self.update_prev_dist_init(cnt, ini)
@@ -280,8 +279,6 @@ class CubeScope(object):
             self.prev_distributions[m][0] = initial_prev_dist[m]
         self.vscost_log = []
 
-        # self.cur_n = self.init_len
-        # return np.full(0,self.l)
         # 2. initialize model parameters
         if return_inference_time:
             return self.model_initialization(tensor_train, n_iter), inference_time
@@ -321,8 +318,6 @@ class CubeScope(object):
 
                 if max_ > max_L:
                     max_L = max_
-                # print(max_L)
-            # return int(np.ceil(max_L/2))
             return int(max_L)
 
         ini_regimes = []
@@ -337,8 +332,6 @@ class CubeScope(object):
             tensor.loc[:, self.time_idx] -= ini * self.width
 
             self.init_status(tensor)
-            # print(tensor)
-            # print(self.prev_distributions)
 
             if self.verbose:
                 print("Online Gibbs Sampling")
@@ -373,15 +366,6 @@ class CubeScope(object):
             self.sampling_log_likelihoods.append(self.each_samp_llh)
             self.compute_factors()
             self.update_prev_dist_init(cnt, ini)
-
-            # # for visualization and print
-            # time_mat = self.factors[0]
-            # self.all_C = (
-            #     np.concatenate([self.all_C, time_mat], axis=0)
-            #     if len(self.all_C)
-            #     else copy.deepcopy(time_mat)
-            # )
-            # self.cur_n += self.width
 
             # find opt regime
             # choose the regime which has most lowest coding cost
@@ -437,14 +421,6 @@ class CubeScope(object):
             for prev_dist_mode in self.prev_distributions
         ]
 
-        # # transform opt_alloc to regime assignment
-        # # e.g., [0,0,0,1,1,0] -> [0,1,0]
-        # prev_r = opt_alloc[0]
-        # regime_assignments = [[0, prev_r]]
-        # for i, r_id in enumerate(opt_alloc[1:]):
-        #     if prev_r != r_id:
-        #         regime_assignments.append([r_id, (i + 1) * self.width])
-        #         prev_r = r_id
         regime_assignments = [[0, 0]]
 
         return regime_assignments
@@ -573,8 +549,6 @@ class CubeScope(object):
         return shift_id
 
     def sample_topic(self, X):
-        # print(self.assignment)
-
         return _gibbs_sampling(
             X,
             self.assignment,
@@ -686,10 +660,6 @@ class CubeScope(object):
         return self.factors
 
     def aggregate_initials(self, init_regimes):
-        """set all_comp_regime & all count
-        set all_comp_regime by aggregation of init_regimes
-        set all_count summation of counterK in each init regime
-        """
         tmp_rgm = Regime()
         tmp_rgm = self.regime_initialize(tmp_rgm)
 
@@ -833,25 +803,14 @@ class CubeScope(object):
         return regime_instance
 
     def regime_update(self, rgm_id):
-        """
-        * pick up allocation in regimes[rgm_id]
-        * add them into current_Ns
-        * compute factors
-        * factors & Ns apply to regimes[rgm_id]
-        NOTE:
-        it need not only updating regime's factors but also updating regime's counter to apply calculation for log likelihood
-        """
         regime = self.regimes[rgm_id]
 
-        # regime.counterK += np.round(self.counterK*LAMBDA).astype(int)
         regime.counterK = regime.counterK.astype(float)
         regime.counterK += np.round(self.counterK * LAMBDA)
-        # regime.counterA += np.round(self.counterA*LAMBDA).astype(int)
         regime.counterA = regime.counterA.astype(float)
         regime.counterA += np.round(self.counterA * LAMBDA)
 
         for mode_ in range(self.n_modes):
-            # regime.counterM[mode_] += np.round(self.counterM[mode_]*LAMBDA).astype(int)
             regime.counterM[mode_] = regime.counterM[mode_].astype(float)
             regime.counterM[mode_] += np.round(self.counterM[mode_] * LAMBDA)
         regime.factors = regime.compute_factors()
@@ -883,12 +842,12 @@ def _gibbs_sampling(X, Z, counterM, counterK, counterA, alpha, betas, k, n_dims)
     np.random.seed(SEED)
     """
     X: event tensor
-    Z: topic assignments of the previous iteration
+    Z: topic/component assignments of the previous iteration
     """
     n_modes = X.shape[1]
     for e, x in enumerate(X):
         # for each non-zero event entry,
-        # assign latent topic, z
+        # assign latent component, z
         pre_topic = Z[e]
         if not pre_topic == -1:
             counterK[pre_topic] -= 1
@@ -941,7 +900,7 @@ def _gibbs_sampling_online(
 
     for e, x in enumerate(X):
         # for each non-zero event entry,
-        # assign latent topic, z
+        # assign latent topic/component, z
         pre_topic = Z[e]
         if not pre_topic == -1:
             counterK[pre_topic] -= 1
@@ -1011,8 +970,8 @@ def logsumexp(x, y, k):
 def _normalize_factors(factors):
     """
     refine each components
-    O: item-wise topic distribution
-    A,C: topic-wise item distribution
+    factors[0]: item-wise topic/component distribution
+    factors[1:]: topic/component-wise item distribution
     """
 
     for d in range(factors[0].shape[0]):
