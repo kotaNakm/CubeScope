@@ -79,7 +79,7 @@ def plot_ground_truth(ax, pattern, width=100):
     st = 0
     for pattern_id in pattern_idxs:
         ax.hlines(y=pattern_id, xmin=st, xmax=st + width, color="gray", linewidth=8)
-        st += 100
+        st += width
     # ax.set_yticklabels([int(i) for i in ax.get_yticks()])
     ax.set_title("Ground truth")
 
@@ -147,13 +147,11 @@ if __name__ == "__main__":
 
     # for experiments
     parser.add_argument("--verbose", action="store_true")
-    parser.add_argument("--pattern", type=str)
+    parser.add_argument("--pattern", type=str) # for synthetic data
 
     # model details
     parser.add_argument("--maxl", type=int, default=5)
     parser.add_argument("--N_ITER", type=int, default=20)
-    # parser.add_argument("--alpha", type=float, default=0.1)
-    # parser.add_argument("--beta", type=float, default=0.1)
 
     args = parser.parse_args()
 
@@ -223,7 +221,7 @@ if __name__ == "__main__":
         .astype("int64")
         - 1
     )
-    print(f"train tensor shape::{tensor_Train.max().values+1}")
+    print(f"train tensor shape: {tensor_Train.max().values+1}")
 
     # train
     CubeScope = CubeScope.CubeScope(
