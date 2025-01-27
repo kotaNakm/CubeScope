@@ -8,7 +8,7 @@ The Web Conference 2023, [WWW'23](https://www2023.thewebconf.org/).
 
 
  CubeScope is freely available for non-commercial purposes. 
- If you intend to use CubeScope for a commercial purpose, please contact us by email at [kota88@sanken.osaka-u.ac.jp]
+ If you intend to use CubeScope for a commercial purpose, please contact us by email at [kotanakm0317@gmail.com]
 
 
 
